@@ -82,24 +82,37 @@ float zeroWind_ADunits;
 float zeroWind_volts;
 float WindSpeed_mps;
 
-// Touch temperature sensor
+// Touch temperature sensor on the towel
 int ThermistorPin = 2;
 int Vo;
 float R1 = 100000;
-float logR2, R2, T, Tc, Tf;
+float logR2, T, Tc;
 float c1 = 1.009249522e-03, c2 = 2.378405444e-04, c3 = 2.019202697e-07;
 
-// Soil moisture sensor
+// Variables of the heat bed temperature sensor
+int tempheatbed_pin = 6;
+int Vo_bed;
+float logR2_bed, T_bed, Tc_bed;
 
+// Variables to control the relay
+int relay_pin = 7;
+volatile byte relayState = LOW;
+
+// Soil moisture sensor
 const int AirValue = 510;   //you need to replace this value with Value_1
 const int WaterValue = 251;  //you need to replace this value with Value_2
 int intervals = (AirValue - WaterValue)/3;
 int soilMoistureValue = 0;
 int soilmoisturepercent=0;
 
-void setup() {
 
-  Serial.begin(9600);   
+void setup() {
+  // setup pin to control the heat bed
+  pinMode(relay_pin, OUTPUT);
+  digitalWrite(relay_pin, LOW);
+  
+  Serial.begin(9600);
+  
   for (auto& sensor : dht) {
     sensor.begin();
   }
@@ -114,46 +127,35 @@ void loop() {
     TMP_Therm_ADunits = analogRead(analogPinForTMP);
     RV_Wind_ADunits = analogRead(analogPinForRV);
     RV_Wind_Volts = (RV_Wind_ADunits * board_voltage / 1023.0);
-
-    
-    // these are all derived from regressions from raw data as such they depend on a lot of experimental factors
-    // such as accuracy of temp sensors, and voltage at the actual wind sensor, (wire losses) which were unaccouted for.
     TempCtimes100 = (0.005 *(TMP_Therm_ADunits * TMP_Therm_ADunits)) - (16.862 * TMP_Therm_ADunits) + 9075.4;
-
     zeroWind_ADunits = -0.0006*(TMP_Therm_ADunits * TMP_Therm_ADunits) + 1.0727 * TMP_Therm_ADunits + 47.172;  //  13.0C  553  482.39
-
     zeroWind_volts = (zeroWind_ADunits * board_voltage / 1023.0) - zeroWindAdjustment;  
-
-    // This from a regression from data in the form of 
-    // Vraw = V0 + b * WindSpeed ^ c
-    // V0 is zero wind at a particular temperature
-    // The constants b and c were determined by some Excel wrangling with the solver.
-    
     WindSpeed_mps = (1.609344 * pow(((RV_Wind_Volts - zeroWind_volts) /.2300) , 2.7265))/3.6;   
 
-
     // DHT-sensors
-
     for (int i = 0; i < 3; i++) {
       t[i] = dht[i].readTemperature();
       h[i] = dht[i].readHumidity();
     }
 
-    //Touch temp
-
+    //Touch temp towel
     Vo = analogRead(ThermistorPin);
     logR2 = log(R1 * ((1024.0 / (float)Vo) - 1.0));
     T = 1.0 / (c1 + (c2*logR2) + (c3*logR2*logR2*logR2));
     Tc = T - 273.15;
-    Tf = (Tc * 9.0)/ 5.0 + 32.0; 
+    //Tf = (Tc * 9.0)/ 5.0 + 32.0; 
 
+    // Heat bed temperature sensor
+    Vo_bed = analogRead(tempheatbed_pin);
+    logR2_bed = log(R1 * ((1024.0 / (float)Vo_bed) - 1.0));
+    T_bed = 1.0 / (c1 + (c2*logR2_bed) + (c3*logR2_bed*logR2_bed*logR2_bed));
+    Tc_bed = T_bed - 273.15;
+    
     // Soil moisture sensor
-
     soilMoistureValue = analogRead(A3);  //put Sensor insert into soil
     soilmoisturepercent = map(soilMoistureValue, AirValue, WaterValue, 0, 100);
 
     // Output to Serial Monitor
-
     for (int i = 0; i < 3; i++) {
       Serial.print(h[i]);
       Serial.print(F("\t"));
@@ -167,24 +169,27 @@ void loop() {
     Serial.print(Tc);
     Serial.print(F("\t"));
 
+    Serial.print(Tc_bed);
+    Serial.print(F("\t"));
+
     Serial.print(soilmoisturepercent);
 
-    /*
-    if(soilmoisturepercent > 100)
-      {
-      Serial.print(100);
-      }
-    else if(soilmoisturepercent <0)
-      {
-      Serial.print(0);
-      }
-    else if(soilmoisturepercent >0 && soilmoisturepercent < 100)
-      {
-      Serial.print(soilmoisturepercent);
-      }
-    */
     Serial.print("\n");
-    lastMillis = millis();    
+
+    // Code to control the temperature in the range
+    if (Tc_bed <= 80) {          // check if the sensor is HIGH   
+      if(relayState == LOW){
+        digitalWrite(relay_pin, HIGH);
+        }
+      relayState = HIGH;  
+      Serial.println("ON");
+    } 
+    if (Tc_bed >= 90) {  
+      digitalWrite(relay_pin, LOW);
+      relayState = LOW;
+      Serial.println("OFF");
+    }
+    lastMillis = millis();
 
     } 
 }
