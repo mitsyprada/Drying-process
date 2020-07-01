@@ -1,0 +1,132 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sensor Chart</title>
+</head>
+<body>
+<h1>Towel Temp and Humidity</h1>
+<h2>number of sample points</h2>
+<form action="/" method="post">
+<select id="count" name="count">
+    <option value="10">10<option>
+    <option value="50">50</option>
+    <option value="100">100</option>
+    <option selected value="200">200</option>
+    <option value="300">300</option>
+    <option value="400">400</option>
+    <option value="500">500</option>
+    <option value="600">600</option>
+    <option value="700">700</option>
+    <option value="800">800</option>
+    <option value="900">900</option>
+    <option value="1000">1000</option>
+
+</select>
+<input type="submit" value="Submit"/>
+    </form>
+<h1>Temperature of Towel</h1>
+    <div style="position:relative; height:40vh; width:80vw">
+        <canvas id="TOWELT" width="400" height="400"></canvas></div>
+<h1>Water content of Towel</h1>
+    <div style="position:relative; height:40vh; width:80vw">
+        <canvas id="TOWELH" width="400" height="400"></canvas></div>
+<h1>Box temperature</h1>
+    <div style="position:relative; height:40vh; width:80vw">
+        <canvas id="BOXT" width="400" height="400"></canvas></div>
+<h1>Box Humidity</h1>
+    <div style="position:relative; height:40vh; width:80vw">
+        <canvas id="BOXH" width="400" height="400"></canvas></div>
+<h1>Outlet Air Temperature</h1>
+    <div style="position:relative; height:40vh; width:80vw">
+        <canvas id="OUTT" width="400" height="400"></canvas></div>
+<h1>Outlet Air Humidity</h1>
+    <div style="position:relative; height:40vh; width:80vw">
+        <canvas id="OUTH" width="400" height="400"></canvas></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+
+<script>
+var t5={{t5|safe}}
+var h3={{h3|safe}}
+var t3={{t3|safe}}
+var h4={{h4|safe}}
+var t2={{t2|safe}}
+var h2={{h2|safe}}
+var dates={{dates|safe}}
+var TowelT = document.getElementById('TOWELT').getContext('2d');
+    var Toweltchart = new Chart(TowelT,{
+    type:'line',
+    data: {
+    labels:dates,
+    datasets:[{
+    label:'{{temperature}}',
+    borderColor:'rgb(255,99,132)',
+    data:t5,
+    fill: false    }]
+}, options:{maintainAspectRatio:false}});
+
+var TowelH = document.getElementById('TOWELH').getContext('2d');
+    var towelh = new Chart(TowelH,{
+    type:'line',
+    data:{
+    labels:dates,
+    datasets:[{
+    label:'{{humidity}}',
+    borderColor:'rgb(255,99,132)',
+    data:h3,
+    fill: false    }]
+}, options:{maintainAspectRatio:false}});
+var BoxH = document.getElementById('BOXH').getContext('2d');
+    var boxh = new Chart(BoxH,{
+    type:'line',
+    data:{
+    labels:dates,
+    datasets:[{
+    label:'{{BoxHumidity}}',
+    borderColor:'rgb(255,99,132)',
+    data:h4,
+    fill: false    }]
+}, options:{maintainAspectRatio:false}});
+var BoxT = document.getElementById('BOXT').getContext('2d');
+    var boxt = new Chart(BoxT,{
+    type:'line',
+    data:{
+    labels:dates,
+    datasets:[{
+    label:'{{BoxTemperature}}',
+    borderColor:'rgb(255,99,132)',
+    data:t3,
+    fill: false    }]
+}, options:{maintainAspectRatio:false}});
+var OutT = document.getElementById('OUTT').getContext('2d');
+    var outt = new Chart(OutT,{
+    type:'line',
+    data:{
+    labels:dates,
+    datasets:[{
+    label:'{{OutletTemperature}}',
+    borderColor:'rgb(255,99,132)',
+    data:t2,
+    fill: false    }]
+}, options:{maintainAspectRatio:false}});
+var OutH = document.getElementById('OUTH').getContext('2d');
+    var outh = new Chart(OutH,{
+    type:'line',
+    data:{
+    labels:dates,
+    datasets:[{
+    label:'{{OutletHumidity}}',
+    borderColor:'rgb(255,99,132)',
+    data:h2,
+    fill: false    }]
+}, options:{maintainAspectRatio:false}});
+
+</script>
+
+
+
+</body>
+
+</html>
+
