@@ -55,11 +55,13 @@ const int WaterValue = 251;  //you need to replace this value with Value_2
 int intervals = (AirValue - WaterValue)/3;
 int soilMoistureValue = 0;
 int soilmoisturepercent = 0;
-const float a = -0.171;
-const float b = 183.44;
+const float a = -0.8444;
+const float b = 380.16;
+
 float soilMoistureWeight = 0;
 
 void setup() {
+  analogReference(EXTERNAL); // use AREF for reference voltage
   // setup pin to control the heat bed
   pinMode(relay_pin, OUTPUT);
   digitalWrite(relay_pin, LOW);
@@ -108,77 +110,77 @@ void loop() {
     // Soil moisture sensor
     soilMoistureValue = analogRead(A0);  //put Sensor insert into soil
     soilmoisturepercent = map(soilMoistureValue, AirValue, WaterValue, 0, 100);
-    soilMoistureWeight = a * soilMoistureValue + b;
+    soilMoistureWeight = a * soilMoistureValue + b ;
 
     // Output to Serial Monitor
     // Sequence:
     // f1-1,t3-2, h4-3, af-4, t1-5, t2-6, h1-7, f2-8, t4-9 , wm-10,  t5-11,  h3-12,  h2-13 
 
-        //f1-1
-    Serial.print("f1:1.00/n");  //ON or OFF
+    //f1-1
+    Serial.println("f1:1.00");  //ON or OFF
 
-        //f2-8
-    Serial.print("f2:1.00"); //ON or OFF
-    Serial.print("/n");
+    //f2-8
+    Serial.println("f2:1.00"); //ON or OFF
+    //Serial.println();
 
-        //t1-5
+    //t1-5
     Serial.print("t1:");
-    Serial.print(t[0], 2); //t1 Celsius
-    Serial.print("/n");
+    Serial.println(t[0], 2); //t1 Celsius
+    //Serial.println();
 
-        //h1-7
+    //h1-7
     Serial.print("h1:");
-    Serial.print(h[0], 2); //h1 relative
-    Serial.print("/n");
+    Serial.println(h[0], 2); //h1 relative
+    //Serial.println();
 
-        //t2-6
+    //t2-6
     Serial.print("t2:");
-    Serial.print(t[1], 2); //t2 Celsius
-    Serial.print("/n");
+    Serial.println(t[1], 2); //t2 Celsius
+    //Serial.println();
 
-        //h2-13
+    //h2-13
     Serial.print("h2:");
-    Serial.print(h[1], 2); //humidity outcoming air relative
-    Serial.print("/n");
+    Serial.println(h[1], 2); //humidity outcoming air relative
+    //Serial.println();
     
-        //t3-2
+    //t3-2
     Serial.print("t3:");
-    Serial.print(t[2], 2); //t3 Celsius
-    Serial.print("/n");
+    Serial.println(t[2], 2); //t3 Celsius
+    //Serial.println();
 
-        //h4-3
+    //h4-3
     Serial.print("h4:");
-    Serial.print(h[2], 2); //h4 relative humidity
-    Serial.print("/n");
+    Serial.println(h[2], 2); //h4 relative humidity
+    //Serial.println();
     
-        //af-4
+    //af-4
     Serial.print("af:");
-    Serial.print(WindSpeed_mps, 2); // meters per second
-    Serial.print("/n");
+    Serial.println(WindSpeed_mps, 2); // meters per second
+    //Serial.println();
     
     //t4-9
     Serial.print("t4:");
-    Serial.print(Tc_bed, 2); //Temperature of the heat bed Celsius
-    Serial.print("/n");
+    Serial.println(Tc_bed, 2); //Temperature of the heat bed Celsius
+    //Serial.println();
     
     //wm-10
     Serial.print("wm:"); //watts
     if (relayState == LOW) {
-      Serial.print("0.00");
+      Serial.println("0.00");
     } else {
-      Serial.print("120.00");
+      Serial.println("120.00");
     }
-    Serial.print("/n");
+    //Serial.println();
 
     //t5-11
     Serial.print("t5:");
-    Serial.print(Tc, 2); //Temperature of the towel Celsius
-    Serial.print("/n");
+    Serial.println(Tc, 2); //Temperature of the towel Celsius
+    //Serial.println();
 
     //h3-12
     Serial.print("h3:");
-    Serial.print(soilMoistureWeight, 2); //Water content of the towel in grams
-    Serial.print("/n");
+    Serial.println(soilMoistureWeight); //Water content of the towel in grams
+    //Serial.println();
 
 
 
@@ -200,14 +202,14 @@ void loop() {
     */
     
     // Code to control the temperature in the range
-    if (Tc_bed <= 80) {          // check if the sensor is HIGH   
+    if (Tc_bed <= 90) {          // check if the sensor is HIGH   
       if(relayState == LOW){
         digitalWrite(relay_pin, HIGH);
         }
       relayState = HIGH;  
       //Serial.println("ON");
     } 
-    if (Tc_bed >= 90) {  
+    if (Tc_bed >= 100) {  
       digitalWrite(relay_pin, LOW);
       relayState = LOW;
       //Serial.println("OFF");
